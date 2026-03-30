@@ -157,7 +157,11 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--sand);col
 .picker-price{font-size:14px;font-weight:600;color:var(--terra);white-space:nowrap;}
 
 /* DATE ROW */
-.date-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;}
+.date-row-wrap{display:flex;gap:0;align-items:stretch;margin-bottom:14px;}
+.date-row-next{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px 0 2px;border-right:1.5px solid var(--parchment);margin-right:10px;min-width:52px;text-align:center;}
+.date-row-next-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--fog);margin-bottom:3px;}
+.date-row-next-date{font-size:11px;font-weight:600;color:var(--sea-deep);line-height:1.3;}
+.date-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex:1;margin-bottom:0;}
 .date-row::-webkit-scrollbar{display:none;}
 .date-chip{flex-shrink:0;padding:9px 12px;border-radius:12px;border:1.5px solid var(--parchment);background:var(--white);cursor:pointer;transition:all .18s;text-align:center;min-width:52px;}
 .date-chip.selected{background:var(--sea);border-color:var(--sea);color:#fff;}
@@ -396,7 +400,119 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--sand);col
 }
 .date-chip:hover .dc-tooltip { display:block; }
 
+/* Disabled date chips (no sailing) */
+.date-chip.disabled{opacity:.25;cursor:not-allowed;pointer-events:none;}
+
 /* Date legend row */
 .date-legend { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; margin-top:-6px; }
 .date-legend-item { display:flex; align-items:center; gap:4px; font-size:10px; color:var(--fog); }
 .date-legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+/* ── DESKTOP LAYOUT ─────────────────────────────────────────────────────────
+   ≥ 768px: sidebar nav on the left, scrollable content on the right.
+   All mobile styles are unchanged — this block only adds/overrides.
+──────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  html, body { overflow: hidden; }
+
+  .app {
+    flex-direction: row;
+    max-width: 1200px;
+    height: 100vh;
+    box-shadow: 0 0 120px rgba(0,0,0,.18);
+  }
+
+  /* ── SIDEBAR ── */
+  .header {
+    width: 220px;
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .header-top {
+    padding: 28px 18px 20px;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+    margin-bottom: 8px;
+    justify-content: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .mybookings-btn { display: none; } /* covered by Bookings tab in nav */
+
+  .logo-mark { width: 48px; height: 48px; font-size: 24px; }
+  .logo-name { font-size: 22px; }
+
+  /* ── VERTICAL NAV ── */
+  .cat-nav {
+    flex-direction: column;
+    overflow-x: unset;
+    overflow-y: auto;
+    flex: 1;
+    padding: 4px 0 24px;
+  }
+
+  .cat-tab {
+    flex-shrink: unset;
+    padding: 11px 18px;
+    font-size: 12px;
+    letter-spacing: .6px;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+    text-align: left;
+    justify-content: flex-start;
+    gap: 8px;
+    white-space: normal;
+  }
+
+  .cat-tab.active {
+    color: var(--gold-light);
+    border-left-color: var(--gold);
+    border-bottom-color: transparent;
+    background: rgba(255,255,255,.07);
+  }
+
+  /* ── CONTENT AREA ── */
+  .panels {
+    flex: 1;
+    height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: var(--sand);
+  }
+
+  .panel { padding: 24px 28px 60px; }
+
+  /* Wider grids */
+  .dp-add-grid { grid-template-columns: repeat(6, 1fr); }
+  .listings    { display: grid; grid-template-columns: repeat(2, 1fr); }
+  .listing     { flex-direction: column; }
+  .listing-img { width: 100%; min-height: 120px; }
+
+  /* Bottom sheets become centered modals on desktop */
+  .sheet-overlay { align-items: center; }
+  .sheet {
+    border-radius: 20px;
+    max-width: 520px;
+    max-height: 85vh;
+    animation: popIn .3s cubic-bezier(.34,1.2,.64,1);
+  }
+
+  /* Wider time grid */
+  .time-grid { grid-template-columns: repeat(5, 1fr); }
+
+  /* Calendar two-column: grid + detail side by side */
+  #panel-calendar .cal-body-row {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+    align-items: start;
+  }
+}

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1a9bbc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -93,13 +93,17 @@
 
       <!-- Calendar view -->
       <div id="calViewCalendar">
-        <div class="cal-nav">
-          <button class="cal-nav-btn" onclick="calPrev()">‹</button>
-          <div class="cal-month-label" id="calMonthLabel"></div>
-          <button class="cal-nav-btn" onclick="calNext()">›</button>
+        <div class="cal-body-row">
+          <div>
+            <div class="cal-nav">
+              <button class="cal-nav-btn" onclick="calPrev()">‹</button>
+              <div class="cal-month-label" id="calMonthLabel"></div>
+              <button class="cal-nav-btn" onclick="calNext()">›</button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+          <div id="calEventDetail" class="cal-event-detail" style="display:none"></div>
         </div>
-        <div class="cal-grid" id="calGrid"></div>
-        <div id="calEventDetail" class="cal-event-detail" style="display:none"></div>
       </div>
 
       <!-- List view -->
@@ -129,8 +133,8 @@
       <!-- Activity adder -->
       <div class="slabel">Add to Your Day</div>
       <div class="dp-add-grid" id="dpAddGrid">
-        <div class="dp-add-btn" onclick="dpAdd('ferry')"><div class="dp-add-icon" style="background:linear-gradient(135deg,#0e9dbd,#38b6cc)">🛥️</div><div class="dp-add-label">Ferry</div><div class="dp-add-price">from £20.77</div></div>
-        <div class="dp-add-btn" onclick="dpAdd('bus')"><div class="dp-add-icon" style="background:linear-gradient(135deg,#0e9dbd,#6dcfe0)">🚌</div><div class="dp-add-label">Toast Rack Tractor Bus</div><div class="dp-add-price">from £1.80</div></div>
+        <div class="dp-add-btn" onclick="dpAdd('ferry')"><div class="dp-add-icon" style="background:linear-gradient(135deg,#0e9dbd,#38b6cc)">🛥️</div><div class="dp-add-label">Ferry</div></div>
+        <div class="dp-add-btn" onclick="dpAdd('bus')"><div class="dp-add-icon" style="background:linear-gradient(135deg,#0e9dbd,#6dcfe0)">🚌</div><div class="dp-add-label">Toast Rack Tractor Bus</div></div>
         <div class="dp-add-btn" onclick="dpAdd('carriage')"><div class="dp-add-icon" style="background:linear-gradient(135deg,#c4892a,#e8b85a)">🐴</div><div class="dp-add-label">Carriage Tour</div><div class="dp-add-price">from £95</div></div>
         <div class="dp-add-btn" onclick="dpAdd('bike')"><div class="dp-add-icon" style="background:linear-gradient(135deg,#2aab6b,#52d48a)">🚲</div><div class="dp-add-label">Bike Hire</div><div class="dp-add-price">from £10</div></div>
         <div class="dp-add-btn" onclick="dpAdd('food')"><div class="dp-add-icon" style="background:linear-gradient(135deg,#c4612a,#e07a45)">🍽️</div><div class="dp-add-label">Food &amp; Drink</div><div class="dp-add-price">from £10</div></div>
@@ -269,7 +273,7 @@
       </div>
 
       <!-- Operator selector -->
-      <div class="slabel">Travelling from</div>
+      <div class="slabel">Connection</div>
       <div style="display:flex;gap:8px;margin-bottom:16px;">
         <div class="bus-type-btn selected" id="ferry-op-shipping" onclick="selectFerryOp('shipping',this)" style="flex:1;">
           <span class="btb-icon">🇬🇬</span>
@@ -323,9 +327,9 @@
           </div>
 
           <div style="padding:0 14px 4px;">
-            <div class="slabel" style="padding:12px 0 6px;margin:0;">Visit Date</div>
+            <div class="slabel" style="padding:12px 0 6px;margin:0;">Outbound Date</div>
             <div class="date-row" id="ferryDateRow" style="margin-bottom:10px;"></div>
-            <div class="slabel" style="padding:4px 0 6px;margin:0;">Sailings</div>
+            <div class="slabel" style="padding:4px 0 6px;margin:0;">Outbound Sailings</div>
             <div id="ferry-sailing-info" style="background:var(--sea-pale);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--sea-deep);line-height:1.8;margin-bottom:8px;">
               Loading sailings…
             </div>
@@ -336,6 +340,19 @@
             <div id="ferry-ret-chips" style="display:none;margin-bottom:4px;">
               <div style="font-size:11px;color:var(--fog);margin-bottom:6px;" id="ferry-ret-label">Return from Sark</div>
               <div class="time-grid" id="ferry-ret-grid"></div>
+            </div>
+            <!-- Period return: separate return date + sailings -->
+            <div id="ferry-periodret-row" style="display:none;">
+              <div class="slabel" style="padding:12px 0 6px;margin:0;">Return Date</div>
+              <div class="date-row" id="ferryRetDateRow" style="margin-bottom:10px;"></div>
+              <div class="slabel" style="padding:4px 0 6px;margin:0;">Return Sailings</div>
+              <div id="ferry-ret-sailing-info" style="background:var(--sea-pale);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--sea-deep);line-height:1.8;margin-bottom:8px;">
+                Select a return date
+              </div>
+              <div id="ferry-ret-date-chips" style="display:none;margin-bottom:4px;">
+                <div style="font-size:11px;color:var(--fog);margin-bottom:6px;">Departures from Sark</div>
+                <div class="time-grid" id="ferry-ret-date-grid"></div>
+              </div>
             </div>
           </div>
           <div style="margin:4px 14px 0;background:var(--sea-pale);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--sea-deep);line-height:1.6;">
@@ -385,7 +402,13 @@
           </div>
           <div style="padding:14px 14px 0;">
 
-            <div class="slabel" style="padding:0;margin-bottom:8px;">From</div>
+            <div class="slabel" style="padding:0;margin-bottom:8px;">Ticket Type</div>
+            <div class="bus-type-row" style="margin-bottom:14px;">
+              <div id="mtab-type-single" class="bus-type-btn selected" onclick="mancheTabType('single')"><span class="btb-icon">🎫</span><div class="btb-name">Single</div></div>
+              <div id="mtab-type-return" class="bus-type-btn"          onclick="mancheTabType('return')"><span class="btb-icon">🔄</span><div class="btb-name">Return</div></div>
+            </div>
+
+            <div class="slabel" style="padding:0;margin-bottom:8px;">Connection</div>
             <div style="display:flex;gap:8px;margin-bottom:14px;">
               <div id="mtab-from-jersey" class="bus-type-btn selected" onclick="mancheTabFrom('jersey')" style="flex:1;"><span class="btb-icon">🇯🇪</span><div class="btb-name">Jersey</div><div class="btb-price">~1h 10min direct</div></div>
               <div id="mtab-from-france" class="bus-type-btn"          onclick="mancheTabFrom('france')" style="flex:1;"><span class="btb-icon">🇫🇷</span><div class="btb-name">France</div><div class="btb-price">Via Jersey · 2 legs</div></div>
@@ -393,7 +416,7 @@
 
             <div id="mtab-france-ports" style="display:none;margin-bottom:14px;">
               <div class="slabel" style="padding:0;margin-bottom:8px;">French Port</div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;flex-direction:row;gap:6px;">
                 <div id="mtab-port-granville" class="bus-type-btn selected" onclick="mancheTabPort('granville')" style="text-align:left;padding:10px 14px;display:flex;justify-content:space-between;"><span>🇫🇷 Granville</span><span class="btb-price">~55min to Jersey</span></div>
                 <div id="mtab-port-carteret"  class="bus-type-btn"          onclick="mancheTabPort('carteret')"  style="text-align:left;padding:10px 14px;display:flex;justify-content:space-between;"><span>🇫🇷 Barneville-Carteret</span><span class="btb-price">~1h 05min to Jersey</span></div>
                 <div id="mtab-port-dielette"  class="bus-type-btn"          onclick="mancheTabPort('dielette')"  style="text-align:left;padding:10px 14px;display:flex;justify-content:space-between;"><span>🇫🇷 Diélette</span><span class="btb-price">~1h 05min to Jersey</span></div>
@@ -401,28 +424,27 @@
               <div style="background:#fff4ee;border-radius:10px;padding:8px 12px;font-size:10px;color:#c4612a;margin-top:8px;">🛂 Passport required · Book 2 legs on manche-iles.com</div>
             </div>
 
-            <div class="slabel" style="padding:0;margin-bottom:8px;">Ticket Type</div>
-            <div class="bus-type-row" style="margin-bottom:14px;">
-              <div id="mtab-type-single" class="bus-type-btn selected" onclick="mancheTabType('single')"><span class="btb-icon">🎫</span><div class="btb-name">Single</div></div>
-              <div id="mtab-type-return" class="bus-type-btn"          onclick="mancheTabType('return')"><span class="btb-icon">🔄</span><div class="btb-name">Return</div></div>
-            </div>
-
             <div class="slabel" style="padding:0;margin-bottom:8px;">Direction</div>
             <div style="display:flex;gap:8px;margin-bottom:14px;">
-              <div id="mtab-dir-tosark"     class="bus-type-btn selected" onclick="mancheTabDir('tosark')"     style="flex:1;"><span class="btb-icon"></span><div class="btb-name" id="mtab-dir-tosark-label"   style="font-size:11px;">Jersey → Sark</div></div>
-              <div id="mtab-dir-fromsark"   class="bus-type-btn"          onclick="mancheTabDir('fromsark')"   style="flex:1;"><span class="btb-icon">↩️</span><div class="btb-name" id="mtab-dir-fromsark-label" style="font-size:11px;">Sark → Jersey</div></div>
+              <div id="mtab-dir-tosark"   class="bus-type-btn selected" onclick="mancheTabDir('tosark')"   style="flex:1;"><span class="btb-icon"></span><div class="btb-name" id="mtab-dir-tosark-label"   style="font-size:11px;">Jersey → Sark</div></div>
+              <div id="mtab-dir-fromsark" class="bus-type-btn"          onclick="mancheTabDir('fromsark')" style="flex:1;"><span class="btb-icon">↩️</span><div class="btb-name" id="mtab-dir-fromsark-label" style="font-size:11px;">Sark → Jersey</div></div>
             </div>
 
             <div class="slabel" style="padding:0;margin-bottom:8px;">Passengers</div>
-            <div class="pax-rows">
+            <div class="pax-rows" style="margin-bottom:14px;">
               <div class="pax-row"><div><div class="pax-row-label">Adults</div></div><div class="pax-ctrl"><button class="pax-btn" onclick="mancheTabPax('adult',-1)">−</button><div class="pax-num" id="mtab-adult-num">1</div><button class="pax-btn" onclick="mancheTabPax('adult',1)">+</button></div></div>
               <div class="pax-row"><div><div class="pax-row-label">Children</div><div class="pax-row-price">4–14 yrs</div></div><div class="pax-ctrl"><button class="pax-btn" onclick="mancheTabPax('child',-1)">−</button><div class="pax-num" id="mtab-child-num">0</div><button class="pax-btn" onclick="mancheTabPax('child',1)">+</button></div></div>
               <div class="pax-row"><div><div class="pax-row-label">Infants</div><div class="pax-row-price">Under 4 · Free</div></div><div class="pax-ctrl"><button class="pax-btn" onclick="mancheTabPax('infant',-1)">−</button><div class="pax-num" id="mtab-infant-num">0</div><button class="pax-btn" onclick="mancheTabPax('infant',1)">+</button></div></div>
             </div>
 
-            <div class="slabel" style="padding:12px 0 8px;margin:0;">Next Sailing</div>
-            <div id="mtab-sailing-info" style="background:var(--sea-pale);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--sea-deep);margin-bottom:14px;line-height:1.7;">
-              Select a date in your plan to see sailings
+            <div class="slabel" style="padding:0;margin-bottom:6px;">Outbound Date</div>
+            <div class="date-row" id="mancheDateRow" style="margin-bottom:10px;"></div>
+            <div id="mtab-sailing-info" style="background:var(--sea-pale);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--sea-deep);margin-bottom:8px;line-height:1.7;">
+              Loading sailings…
+            </div>
+            <div id="mtab-time-chips" style="display:none;margin-bottom:14px;">
+              <div style="font-size:11px;color:var(--fog);margin-bottom:6px;" id="mtab-time-label">Departure time</div>
+              <div class="time-grid" id="mtab-time-grid"></div>
             </div>
 
           </div>
@@ -1033,6 +1055,7 @@ window.addEventListener('load',()=>{
   renderEat();
   initEvents();
   initFerrySailings();
+  initFares();
   populateDatesYear('foodDates',iso=>S.food.date=iso);
   setTimeout(()=>document.getElementById('splash').classList.add('hide'),1800);
   const p=new URLSearchParams(location.search);
@@ -1229,7 +1252,20 @@ function populateDatesYear(elId, cb){
 
   cb(dates[0].iso);
 
-  // Insert legend below if not already there
+  // Wrap in .date-row-wrap with a next-date label if not already wrapped
+  if(!el.parentElement.classList.contains('date-row-wrap')){
+    const wrap=document.createElement('div');
+    wrap.className='date-row-wrap';
+    el.parentNode.insertBefore(wrap,el);
+    const nextLabel=document.createElement('div');
+    nextLabel.className='date-row-next';
+    nextLabel.id=elId+'-next';
+    nextLabel.innerHTML=`<div class="date-row-next-label">Next</div><div class="date-row-next-date">${formatNextDate(dates[0].iso)}</div>`;
+    wrap.appendChild(nextLabel);
+    wrap.appendChild(el);
+  }
+
+  // Insert legend below wrap if not already there
   const legendId=elId+'-legend';
   if(!document.getElementById(legendId)){
     const legend=document.createElement('div');
@@ -1239,18 +1275,62 @@ function populateDatesYear(elId, cb){
       {color:'#7ad45a',label:'Nature'},{color:'#c4892a',label:'Community'},
       {color:'#a855f7',label:'Arts'},{color:'#d4a017',label:'Multiple'},
     ].map(l=>`<div class="date-legend-item"><div class="date-legend-dot" style="background:${l.color}"></div>${l.label}</div>`).join('');
-    el.insertAdjacentElement('afterend',legend);
+    el.parentElement.insertAdjacentElement('afterend',legend);
   }
+}
+
+function refreshDateRowColors(elId){
+  const el=document.getElementById(elId); if(!el) return;
+  const EVENT_TYPE_PRIORITY=['festival','sports','nature','community','arts'];
+  el.querySelectorAll('.date-chip').forEach(chip=>{
+    const onclick=chip.getAttribute('onclick')||'';
+    const m=onclick.match(/'(\d{4}-\d{2}-\d{2})'/);
+    if(!m) return;
+    const iso=m[1];
+    const evts=(EVENT_MAP[iso]||[]);
+    const types=[...new Set(evts.map(e=>e.type))];
+    const primaryType=EVENT_TYPE_PRIORITY.find(t=>types.includes(t))||(types[0]||null);
+    chip.classList.remove('has-event','ev-multi','ev-festival','ev-sports','ev-nature','ev-community','ev-arts','ev-ferry');
+    if(evts.length>0){
+      chip.classList.add('has-event');
+      chip.classList.add(evts.length>1&&types.length>1?'ev-multi':`ev-${primaryType}`);
+    }
+  });
+}
+
+function formatNextDate(iso){
+  const d=new Date(iso+'T12:00:00');
+  const today=new Date(); today.setHours(0,0,0,0);
+  const diff=Math.round((d-today)/86400000);
+  if(diff===0) return 'Today';
+  if(diff===1) return 'Tomorrow';
+  return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
 }
 function pickDate(el,rowId,iso){
   document.getElementById(rowId).querySelectorAll('.date-chip').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
+  // Return date row has its own handler — don't touch dpDate or outbound sailings
+  if(rowId==='ferryRetDateRow'){
+    ferryState.retDate=iso;
+    ferryTabUpdateReturnSailings();
+    return;
+  }
   dpDate = iso;
+  const nextLbl=document.getElementById(rowId+'-next');
+  if(nextLbl) nextLbl.querySelector('.date-row-next-date').textContent=formatNextDate(iso);
   if(rowId==='bikeDates') S.bike.date=iso;
   else if(rowId==='foodDates') S.food.date=iso;
   // Keep ferry date row in sync with planner row and vice versa
   if(rowId==='plannerDateRow') syncDateRow('ferryDateRow', iso);
-  if(rowId==='ferryDateRow')   syncDateRow('plannerDateRow', iso);
+  if(rowId==='ferryDateRow'){
+    syncDateRow('plannerDateRow', iso);
+    // Sync return date to outbound date for period returns
+    if(ferryState.type==='periodret'){
+      ferryState.retDate=iso;
+      syncDateRow('ferryRetDateRow', iso);
+      ferryTabUpdateReturnSailings();
+    }
+  }
   ferryTabUpdateSailings();
 }
 function syncDateRow(rowId, iso){
@@ -1545,7 +1625,7 @@ function buildFerryPicker(){
     </div>
     <div style="padding:14px 18px 32px;">
 
-      <div class="slabel">Travelling from</div>
+      <div class="slabel">Connection</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
         <div id="fpop-shipping" class="bus-type-btn selected" onclick="fpSelectOp('shipping')" style="flex:1;min-width:calc(50% - 4px);">
           <span class="btb-icon">🇬🇬</span><div class="btb-name">Guernsey</div>
@@ -2355,6 +2435,62 @@ async function initEvents(){
   }
   buildEventMap();
   calRender();
+  ['plannerDateRow','ferryDateRow','ferryRetDateRow','bikeDates','foodDates','charterDateRow'].forEach(refreshDateRowColors);
+}
+
+async function initFares(){
+  try{
+    const res=await fetch(`${WORKER_URL}/fares`);
+    if(!res.ok) return;
+    const rows=await res.json();
+    const f={}; // keyed by "provider/ticket_type"
+    rows.forEach(r=>{ f[`${r.provider}/${r.ticket_type}`]=parseFloat(r.total); });
+    const g=k=>f[k]; // helper
+
+    // Update FERRY_FARES
+    if(g('ioss/adult-single'))          FERRY_FARES.single.adult       = g('ioss/adult-single');
+    if(g('ioss/child-single'))          FERRY_FARES.single.child       = g('ioss/child-single');
+    if(g('ioss/dog-single'))            FERRY_FARES.single.dog         = g('ioss/dog-single');
+    if(g('ioss/adult-dayret-offpeak'))  FERRY_FARES.dayret.adult       = g('ioss/adult-dayret-offpeak');
+    if(g('ioss/child-dayret-offpeak'))  FERRY_FARES.dayret.child       = g('ioss/child-dayret-offpeak');
+    if(g('ioss/adult-dayret-peak'))     FERRY_FARES.dayret.peakAdult   = g('ioss/adult-dayret-peak');
+    if(g('ioss/child-dayret-peak'))     FERRY_FARES.dayret.peakChild   = g('ioss/child-dayret-peak');
+    if(g('ioss/dog-return'))            FERRY_FARES.dayret.dog         = g('ioss/dog-return');
+    if(g('ioss/adult-period-return'))   FERRY_FARES.periodret.adult    = g('ioss/adult-period-return');
+    if(g('ioss/child-period-return'))   FERRY_FARES.periodret.child    = g('ioss/child-period-return');
+    if(g('ioss/dog-return'))            FERRY_FARES.periodret.dog      = g('ioss/dog-return');
+
+    // Update BUS fares
+    if(g('bus/adult-single'))  BUS.single.adult = g('bus/adult-single');
+    if(g('bus/child-single'))  BUS.single.child = g('bus/child-single');
+    if(g('bus/adult-return'))  BUS.return.adult = g('bus/adult-return');
+    if(g('bus/child-return'))  BUS.return.child = g('bus/child-return');
+
+    // Sync DP_ITEMS so day planner prices match
+    DP_ITEMS.ferry.priceAdult  = FERRY_FARES.single.adult;
+    DP_ITEMS.ferry.priceChild  = FERRY_FARES.single.child;
+    DP_ITEMS.ferry.returnAdult = FERRY_FARES.periodret.adult;
+    DP_ITEMS.ferry.returnChild = FERRY_FARES.periodret.child;
+    DP_ITEMS.bus.priceAdult    = BUS.single.adult;
+    DP_ITEMS.bus.priceChild    = BUS.single.child;
+    DP_ITEMS.bus.returnAdult   = BUS.return.adult;
+    DP_ITEMS.bus.returnChild   = BUS.return.child;
+
+    // Refresh displayed price labels
+    const fmt=n=>n<1?Math.round(n*100)+'p':'£'+n.toFixed(2);
+    const fa=FERRY_FARES, ba=BUS;
+    const setTxt=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+setTxt('ferry-adult-unit',`£${fa.single.adult.toFixed(2)} each`);
+    setTxt('ferry-child-unit',`£${fa.single.child.toFixed(2)} each`);
+    setTxt('ferry-dog-unit',  `£${fa.single.dog.toFixed(2)} single · £${fa.dayret.dog.toFixed(2)} return`);
+    setTxt('bus-adult-unit',  `${fmt(ba.single.adult)} single · ${fmt(ba.return.adult)} return`);
+    setTxt('bus-child-unit',  `${fmt(ba.single.child)} single · ${fmt(ba.return.child)} return`);
+    updateFerrySummary?.();
+    updateBusSummary?.();
+    fpUpdateSummary?.();
+  }catch(e){
+    console.warn('Could not load fares:',e);
+  }
 }
 
 async function initFerrySailings(){
@@ -2380,8 +2516,13 @@ async function initFerrySailings(){
   buildEventMap();
   calRender();
   if(calView==='list') calRenderList();
+  ['plannerDateRow','ferryDateRow','ferryRetDateRow','bikeDates','foodDates','charterDateRow'].forEach(refreshDateRowColors);
   ferryTabUpdateSailings();
   if(typeof fpUpdateSailingsPanel==='function') fpUpdateSailingsPanel();
+  // Repopulate Manche date row now that timetable is loaded from DB
+  const mancheRow=document.getElementById('mancheDateRow');
+  if(mancheRow) mancheRow.innerHTML='';
+  populateMancheDates();
 }
 
 let calYear=new Date().getFullYear(),calMonth=new Date().getMonth(),calSelectedDate=null;
@@ -2787,7 +2928,7 @@ const FERRY_FARES = {
   periodret: { adult:39.99, child:18.50, dog:10.39 },
 };
 
-let ferryState = { type:'single', dir:'gsy', adults:1, children:0, infants:0, dogs:0, depTime:'08:00', retTime:'08:30', retLegTime:'08:30' };
+let ferryState = { type:'single', dir:'gsy', adults:1, children:0, infants:0, dogs:0, depTime:'08:00', retTime:'08:30', retLegTime:'08:30', retDate:null };
 
 function selectFerryOp(op, el){
   document.querySelectorAll('[id^="ferry-op-"]').forEach(b=>b.classList.remove('selected'));
@@ -2796,7 +2937,7 @@ function selectFerryOp(op, el){
   const isCharter = op==='charter';
   const isShipping= op==='shipping';
   document.getElementById('ferry-shipping-section').style.display = isShipping ? 'block' : 'none';
-  document.getElementById('ferry-manche-section').style.display   = isManche   ? 'block' : 'none'; if(isManche){ mancheTabUpdateDirLabels(); mancheTabUpdateSailing(); }
+  document.getElementById('ferry-manche-section').style.display   = isManche   ? 'block' : 'none'; if(isManche){ mancheTabUpdateDirLabels(); populateMancheDates(); mancheTabUpdateSailing(); }
   document.getElementById('ferry-charter-section').style.display  = isCharter  ? 'block' : 'none';
 }
 
@@ -2804,8 +2945,46 @@ function selectFerryType(t, el){
   ferryState.type = t;
   document.querySelectorAll('[id^="ferry-type-"]').forEach(b=>b.classList.remove('selected'));
   el.classList.add('selected');
+  const isPeriod = t === 'periodret';
+  document.getElementById('ferry-periodret-row').style.display = isPeriod ? 'block' : 'none';
+  if(isPeriod){
+    if(!document.getElementById('ferryRetDateRow').children.length){
+      populateDatesYear('ferryRetDateRow', iso => {
+        ferryState.retDate = iso;
+        ferryTabUpdateReturnSailings();
+      });
+    }
+    // Default return date to the current outbound date
+    if(dpDate){ ferryState.retDate=dpDate; syncDateRow('ferryRetDateRow',dpDate); ferryTabUpdateReturnSailings(); }
+  }
   ferryTabUpdateSailings();
   updateFerryPriceLabels();
+  updateFerrySummary();
+}
+
+function ferryTabUpdateReturnSailings(){
+  const ref = ferryState.retDate;
+  const infoEl = document.getElementById('ferry-ret-sailing-info');
+  const chipsEl = document.getElementById('ferry-ret-date-chips');
+  const gridEl  = document.getElementById('ferry-ret-date-grid');
+  if(!infoEl) return;
+  if(!ref){ infoEl.innerHTML='Select a return date'; chipsEl.style.display='none'; return; }
+  const s = iossGetSailings(ref);
+  const fmtD = iso=>new Date(iso+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  if(!s){
+    infoEl.style.background='#fff4ee'; infoEl.style.color='#c4612a';
+    infoEl.innerHTML=`⚠️ No scheduled sailing on ${fmtD(ref)}`;
+    chipsEl.style.display='none'; return;
+  }
+  infoEl.style.background='var(--sea-pale)'; infoEl.style.color='var(--sea-deep)';
+  infoEl.innerHTML=`✓ Sailings on ${fmtD(ref)}`;
+  // Show departure times from the return origin
+  const returnFrom = ferryState.dir==='gsy' ? 'Sark' : 'Guernsey';
+  chipsEl.querySelector('div').textContent = `Return from ${returnFrom}`;
+  const times = ferryState.dir==='gsy' ? s.sark : s.gsy;
+  gridEl.innerHTML = times.map((t,i)=>`<div class="time-slot ${i===0?'selected':''}" onclick="selectFerryTabTime('retdate','${t}',this)">${t}</div>`).join('');
+  ferryState.retLegTime = times[0];
+  chipsEl.style.display = 'block';
   updateFerrySummary();
 }
 
@@ -2875,7 +3054,10 @@ function updateFerrySummary(){
   const typeLabels = {single:'Single',dayret:'Day Return',periodret:'Period Return'};
   const dirLabels  = {gsy:'Guernsey → Sark', sark:'Sark → Guernsey'};
   document.getElementById('ferry-sum-type').textContent = typeLabels[ferryState.type]||'';
-  document.getElementById('ferry-sum-dir').textContent  = dirLabels[ferryState.dir]||'';
+  const retDateLabel = ferryState.type==='periodret' && ferryState.retDate
+    ? ' · Returns '+new Date(ferryState.retDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'})
+    : '';
+  document.getElementById('ferry-sum-dir').textContent  = (dirLabels[ferryState.dir]||'') + retDateLabel;
 
   const rowA = document.getElementById('ferry-row-a');
   rowA.style.display = ferryState.adults>0?'flex':'none';
@@ -2915,7 +3097,7 @@ function selectBusOp(op, el){
 
 
 /* ── MANCHE ILES TAB FUNCTIONS ─────────────────────────────────────────── */
-const mtabState = { from:'jersey', port:'granville', type:'single', dir:'tosark', adults:1, children:0, infants:0 };
+const mtabState = { from:'jersey', port:'granville', type:'single', dir:'tosark', adults:1, children:0, infants:0, date:null };
 
 function mancheTabFrom(v){
   mtabState.from=v;
@@ -2955,24 +3137,95 @@ function mancheTabUpdateDirLabels(){
   const tl=document.getElementById('mtab-dir-tosark-label');   if(tl) tl.textContent=from+' → Sark';
   const fl=document.getElementById('mtab-dir-fromsark-label'); if(fl) fl.textContent='Sark → '+from;
 }
+function populateMancheDates(){
+  const row=document.getElementById('mancheDateRow'); if(!row) return;
+  if(row.children.length){
+    // Already populated — just re-scroll to first sailing date
+    const firstSailing=Array.from(row.children).find(c=>!c.classList.contains('disabled'));
+    if(firstSailing) setTimeout(()=>{ row.scrollLeft=firstSailing.offsetLeft - row.offsetWidth/2 + firstSailing.offsetWidth/2; },50);
+    mancheTabUpdateSailing();
+    return;
+  }
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dates=Array.from({length:365},(_,i)=>{
+    const d=new Date(); d.setDate(d.getDate()+i);
+    return {day:days[d.getDay()],num:d.getDate(),month:d.toLocaleDateString('en-GB',{month:'short'}),iso:d.toISOString().split('T')[0]};
+  });
+  // Find the first sailing date to pre-select
+  const firstSailing=dates.find(d=>mancheGetSailings(d.iso));
+  row.innerHTML=dates.map(d=>{
+    const hasSailing=!!mancheGetSailings(d.iso);
+    const isFirst=firstSailing&&d.iso===firstSailing.iso;
+    const disabled=hasSailing?'':'disabled';
+    return `<div class="date-chip ${isFirst?'selected':''} ${disabled}" onclick="pickMancheDate(this,'${d.iso}')">
+      <div class="date-day">${d.day}</div>
+      <div class="date-num">${d.num}</div>
+      <div class="date-day" style="font-size:8px;">${d.month}</div>
+    </div>`;
+  }).join('');
+  // Wrap with next-date label if not already wrapped
+  if(!row.parentElement.classList.contains('date-row-wrap')){
+    const wrap=document.createElement('div');
+    wrap.className='date-row-wrap';
+    row.parentNode.insertBefore(wrap,row);
+    const nextLabel=document.createElement('div');
+    nextLabel.className='date-row-next';
+    nextLabel.id='mancheDateRow-next';
+    nextLabel.innerHTML=`<div class="date-row-next-label">Next</div><div class="date-row-next-date">${firstSailing?formatNextDate(firstSailing.iso):'None'}</div>`;
+    wrap.appendChild(nextLabel);
+    wrap.appendChild(row);
+  } else {
+    const lbl=document.getElementById('mancheDateRow-next');
+    if(lbl) lbl.querySelector('.date-row-next-date').textContent=firstSailing?formatNextDate(firstSailing.iso):'None';
+  }
+
+  if(firstSailing){
+    mtabState.date=firstSailing.iso;
+    mancheTabUpdateSailing();
+    // Scroll the date row to the first sailing date
+    const idx=dates.findIndex(d=>d.iso===firstSailing.iso);
+    if(idx>0) setTimeout(()=>{
+      const chip=row.children[idx];
+      if(chip) row.scrollLeft=chip.offsetLeft - row.offsetWidth/2 + chip.offsetWidth/2;
+    },50);
+  }
+}
+
+function pickMancheDate(el, iso){
+  document.getElementById('mancheDateRow').querySelectorAll('.date-chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  mtabState.date=iso;
+  mancheTabUpdateSailing();
+}
+
 function mancheTabUpdateSailing(){
   const infoEl=document.getElementById('mtab-sailing-info'); if(!infoEl) return;
-  const refDate=dpDate||new Date().toISOString().split('T')[0];
+  const timeChips=document.getElementById('mtab-time-chips');
+  const timeGrid=document.getElementById('mtab-time-grid');
+  const timeLabel=document.getElementById('mtab-time-label');
+  const refDate=mtabState.date||dpDate||new Date().toISOString().split('T')[0];
   const sailing=mancheGetSailings(refDate);
-  const next=sailing?null:fpNextSailing(refDate);
   const fmtD=iso=>new Date(iso+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
   const pn={granville:'Granville',carteret:'Carteret',dielette:'Diélette'};
   const from=mtabState.from==='france'?(pn[mtabState.port]||'France'):'Jersey';
   if(sailing){
-    const dep=mtabState.dir==='fromsark'?sailing.ret:sailing.dep;
-    infoEl.style.background='var(--sea-pale)';
-    infoEl.innerHTML=`<strong>✓ Sailing on ${fmtD(refDate)}</strong><br>${from} → Sark · Departs <strong>${dep}</strong>${mtabState.type==='return'?` · Return ${mtabState.dir==='tosark'?sailing.ret:sailing.dep}`:''}`;
-  } else if(next){
-    infoEl.style.background='#fff4ee';
-    infoEl.innerHTML=`⚠️ No sailing on ${fmtD(refDate)}<br><strong>Next sailing: ${fmtD(next)}</strong> · Departs ${mtabState.dir==='fromsark'?'Sark '+mancheGetSailings(next).ret:from+' '+mancheGetSailings(next).dep}`;
+    infoEl.style.background='var(--sea-pale)'; infoEl.style.color='var(--sea-deep)';
+    infoEl.innerHTML=`✓ Sailing on ${fmtD(refDate)}`;
+    if(timeChips && timeGrid && timeLabel){
+      const isFromsark = mtabState.dir==='fromsark';
+      timeLabel.textContent = isFromsark ? 'Departs Sark' : `Departs ${from}`;
+      const dep = isFromsark ? sailing.ret : sailing.dep;
+      timeGrid.innerHTML=`<div class="time-slot selected">${dep}</div>`;
+      if(mtabState.type==='return'){
+        const retDep = isFromsark ? sailing.dep : sailing.ret;
+        timeGrid.innerHTML+=`<div class="time-slot" style="opacity:.6;cursor:default;">${retDep} ↩</div>`;
+      }
+      timeChips.style.display='block';
+    }
   } else {
-    infoEl.style.background='#fff4ee';
-    infoEl.innerHTML='No more sailings in the 2026 season (May–September).';
+    infoEl.style.background='#fff4ee'; infoEl.style.color='#c4612a';
+    infoEl.innerHTML=refDate ? `⚠️ No sailing on ${fmtD(refDate)}` : 'Select a sailing date';
+    if(timeChips) timeChips.style.display='none';
   }
 }
 
@@ -3192,7 +3445,8 @@ function filterAdventure(type, el){
     ferryState.depTime = times[0];
   }
   if(retChips && retGrid && retLabel){
-    const show = (dir==='gsy' && isReturn) || dir==='sark';
+    // Period returns use the separate return date section — hide same-day return chips
+    const show = ferryState.type !== 'periodret' && ((dir==='gsy' && isReturn) || dir==='sark');
     retLabel.textContent = dir==='gsy' ? 'Return from Sark' : 'Return to Guernsey';
     if(show){
       const rtimes = dir==='gsy' ? s.sark : s.gsy;
@@ -3202,10 +3456,12 @@ function filterAdventure(type, el){
   }
 }
 function selectFerryTabTime(leg, t, el){
-  const grid = leg==='dep' ? document.getElementById('ferry-dep-grid') : document.getElementById('ferry-ret-grid');
-  grid?.querySelectorAll('.time-slot').forEach(b=>b.classList.remove('selected'));
+  const gridId = leg==='dep' ? 'ferry-dep-grid' : leg==='retdate' ? 'ferry-ret-date-grid' : 'ferry-ret-grid';
+  document.getElementById(gridId)?.querySelectorAll('.time-slot').forEach(b=>b.classList.remove('selected'));
   el.classList.add('selected');
-  if(leg==='dep') ferryState.depTime=t; else ferryState.retTime=t;
+  if(leg==='dep') ferryState.depTime=t;
+  else if(leg==='retdate') ferryState.retLegTime=t;
+  else ferryState.retTime=t;
   updateFerrySummary();
 }
 

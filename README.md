@@ -45,43 +45,43 @@ Payments follow a similar pattern: the browser sends booking details to `/checko
 
 ## Local Development
 
-### 1. Configure secrets
+1. Configure secrets
 
-Copy the template and fill in your credentials:
+   Copy the template and fill in your credentials:
+   
+   ```bash
+   cp worker/.dev.vars.example worker/.dev.vars
+   ```
+   
+   ```
+   SUMUP_API_KEY=your_sumup_bearer_token
+   SUPABASE_URL=https://xxxx.supabase.co
+   SUPABASE_SERVICE_KEY=your_supabase_service_role_key
+   ADMIN_TOKEN=choose_a_secret_token_for_admin_access
+   ALLOWED_ORIGIN=http://localhost:3000
+   SUPABASE_PAT=your_supabase_personal_access_token  # optional, for running DB scripts
+   ```
+   
+   You'll need Supabase and SumUp credentials — see [External Services](#external-services) below.
 
-```bash
-cp worker/.dev.vars.example worker/.dev.vars
-```
+2. Start the dev environment
 
-```
-SUMUP_API_KEY=your_sumup_bearer_token
-SUPABASE_URL=https://xxxx.supabase.co
-SUPABASE_SERVICE_KEY=your_supabase_service_role_key
-ADMIN_TOKEN=choose_a_secret_token_for_admin_access
-ALLOWED_ORIGIN=http://localhost:3000
-SUPABASE_PAT=your_supabase_personal_access_token  # optional, for running DB scripts
-```
-
-You'll need Supabase and SumUp credentials — see [External Services](#external-services) below.
-
-### 2. Start the dev environment
-
-```bash
-./dev.sh
-```
-
-This starts two servers:
-- **Static site** → `http://localhost:3000`
-- **Worker API** → `http://localhost:8787`
-
-The app automatically points to `localhost:8787` when running on localhost.
-
-```bash
-./dev.sh stop      # stop both servers
-./dev.sh restart   # restart both
-```
-
-Logs are written to `/tmp/visit-sark-serve.log` and `/tmp/visit-sark-worker.log`.
+   ```bash
+   ./dev.sh
+   ```
+   
+   This starts two servers:
+   - **Static site** → `http://localhost:3000`
+     - **Worker API** → `http://localhost:8787`
+   
+   The app automatically points to `localhost:8787` when running on localhost.
+   
+   ```bash
+   ./dev.sh stop      # stop both servers
+   ./dev.sh restart   # restart both
+   ```
+   
+   Logs are written to `/tmp/visit-sark-serve.log` and `/tmp/visit-sark-worker.log`.
 
 ### Static pages only
 

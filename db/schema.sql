@@ -120,6 +120,28 @@ alter table ferry_sailings enable row level security;
 create policy "public read ferry_sailings" on ferry_sailings for select using (true);
 create policy "service role write ferry_sailings" on ferry_sailings for all using (auth.role() = 'service_role');
 
+-- ── FARES ────────────────────────────────────────────────────────────────────
+-- Provider price lists. The app loads these at startup to avoid hardcoding.
+-- provider: 'ioss' | 'bus'
+-- ticket_type: machine-readable key used in booking logic
+
+create table if not exists fares (
+  id           uuid primary key default gen_random_uuid(),
+  provider     text not null,
+  ticket_type  text not null,
+  label        text not null,
+  base_fare    numeric(8,2),
+  total        numeric(8,2) not null,
+  valid_from   date,
+  notes        text,
+  created_at   timestamptz default now(),
+  unique (provider, ticket_type)
+);
+
+alter table fares enable row level security;
+create policy "public read fares"        on fares for select using (true);
+create policy "service role write fares" on fares for all    using (auth.role() = 'service_role');
+
 -- ── INDEXES ──────────────────────────────────────────────────────────────────
 
 create index if not exists bookings_token_idx     on bookings(token);

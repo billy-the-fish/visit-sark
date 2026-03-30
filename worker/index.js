@@ -36,6 +36,7 @@ export default {
         case '/ticket/validate':   return handleValidateTicket(request, env);
         case '/events':            return handleEvents(request, env);
         case '/ferry-sailings':    return handleFerrySailings(request, env);
+        case '/fares':             return handleFares(request, env);
         default:
           return json({ error: 'Not found' }, 404, env);
       }
@@ -172,6 +173,19 @@ async function handleEvents(request, env) {
   }
 
   return json({ error: 'Method not allowed' }, 405, env);
+}
+
+// ── FARES ────────────────────────────────────────────────────────────────────
+
+async function handleFares(request, env) {
+  const url = new URL(request.url);
+  const provider = url.searchParams.get('provider');
+  let path = '/rest/v1/fares?select=*&order=provider.asc,ticket_type.asc';
+  if (provider) path += `&provider=eq.${provider}`;
+  const res = await supabase(env, 'GET', path);
+  const data = await res.json();
+  if (!res.ok) return json({ error: 'Failed to fetch fares' }, 500, env);
+  return json(data, 200, env);
 }
 
 // ── FERRY SAILINGS ───────────────────────────────────────────────────────────
