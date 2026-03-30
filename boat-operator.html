@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0e7fa0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Visit Sark — Ferry">
+<link rel="manifest" href="manifest.json">
+<title>Visit Sark — Boat Operator</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sea: #38b6cc; --sea-deep: #0e7fa0; --sea-pale: #e4f8fb;
+  --sand: #f5efe0; --cream: #fdfaf4;
+  --ink: #1a2a2e; --fog: #7a9ea6;
+  --success: #2e7d52; --error: #c0392b;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Outfit', sans-serif; background: var(--sea-deep); color: #fff; min-height: 100vh; }
+
+.header { padding: 50px 18px 0; background: var(--sea-deep); }
+.header-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px; }
+h1 { font-size: 18px; font-weight: 600; }
+.date-badge { font-size: 12px; opacity: .65; }
+
+/* Service tabs */
+.service-tabs { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; padding-bottom: 0; }
+.service-tabs::-webkit-scrollbar { display: none; }
+.service-tab { flex-shrink: 0; padding: 10px 14px; background: transparent; border: none; color: rgba(255,255,255,.5); font-size: 11px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; font-family: 'Outfit', sans-serif; }
+.service-tab.active { color: #fff; border-bottom-color: rgba(255,255,255,.8); }
+
+.content { background: var(--sand); min-height: calc(100vh - 100px); padding: 16px 14px 80px; }
+
+/* Manifest */
+.manifest-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.manifest-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+.pax-count { font-size: 22px; font-weight: 700; color: var(--sea-deep); }
+.pax-label { font-size: 11px; color: var(--fog); }
+
+.passenger-list { display: flex; flex-direction: column; gap: 8px; }
+.passenger-card { background: var(--cream); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; border: 1px solid #e8ddc8; }
+.passenger-card.boarded { border-color: var(--success); background: #f0faf4; }
+.pax-info { flex: 1; }
+.pax-name { font-weight: 600; font-size: 14px; color: var(--ink); }
+.pax-detail { font-size: 12px; color: var(--fog); margin-top: 2px; }
+.pax-tickets { font-size: 11px; color: var(--fog); margin-top: 2px; }
+.board-btn { padding: 8px 14px; border: none; border-radius: 10px; background: var(--sea-deep); color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; }
+.board-btn.boarded { background: var(--success); }
+.board-btn:disabled { opacity: .5; cursor: default; }
+
+/* Scan button */
+.scan-fab { position: fixed; bottom: 24px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: var(--sea-deep); border: none; color: #fff; font-size: 24px; cursor: pointer; box-shadow: 0 6px 20px rgba(14,127,160,.45); display: flex; align-items: center; justify-content: center; }
+
+/* Stats bar */
+.stats-bar { display: flex; gap: 12px; margin-bottom: 16px; }
+.stat { flex: 1; background: var(--cream); border-radius: 12px; padding: 12px; text-align: center; border: 1px solid #e8ddc8; }
+.stat-n { font-size: 20px; font-weight: 700; color: var(--sea-deep); }
+.stat-l { font-size: 11px; color: var(--fog); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>⛵ Boat Operator</h1>
+      <div class="date-badge" id="today-date"></div>
+    </div>
+    <button style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:7px 13px;font-size:11px;color:#fff;cursor:pointer;" onclick="refreshManifest()">↻ Refresh</button>
+  </div>
+  <div class="service-tabs">
+    <button class="service-tab active" onclick="setService('ferry',this)">🛥️ Ferry</button>
+    <button class="service-tab" onclick="setService('sightseeing',this)">🚤 Sightseeing</button>
+    <button class="service-tab" onclick="setService('charter',this)">⚓ Charter</button>
+    <button class="service-tab" onclick="setService('kayak',this)">🛶 Kayaking</button>
+  </div>
+</div>
+
+<div class="content" id="content">
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-n" id="stat-total">—</div><div class="stat-l">Booked</div></div>
+    <div class="stat"><div class="stat-n" id="stat-boarded">0</div><div class="stat-l">Boarded</div></div>
+    <div class="stat"><div class="stat-n" id="stat-remaining">—</div><div class="stat-l">Remaining</div></div>
+  </div>
+
+  <div class="manifest-header">
+    <div class="manifest-title">Passenger Manifest</div>
+  </div>
+
+  <div class="passenger-list" id="passenger-list">
+    <!-- Populated by JS -->
+    <div style="text-align:center;padding:40px;color:#7a9ea6;font-size:14px;">
+      Loading manifest…
+    </div>
+  </div>
+</div>
+
+<button class="scan-fab" onclick="scanQR()" title="Scan QR">📷</button>
+
+<script>
+let currentService = 'ferry';
+let manifest = [];
+let boarded = new Set();
+
+document.getElementById('today-date').textContent =
+  new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+function setService(s, el) {
+  currentService = s;
+  document.querySelectorAll('.service-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadManifest();
+}
+
+async function loadManifest() {
+  // TODO: fetch from Cloudflare Worker / Supabase
+  // const res = await fetch(`${WORKER_URL}/manifest?service=${currentService}&date=${today}`);
+  // manifest = await res.json();
+
+  // Demo data
+  manifest = [
+    { id: '1', name: 'Smith Family', detail: 'Guernsey → Sark · 10:30', tickets: '2 adults, 1 child' },
+    { id: '2', name: 'J. Lebrun',    detail: 'Guernsey → Sark · 10:30', tickets: '1 adult' },
+    { id: '3', name: 'Chen & Chen',  detail: 'Guernsey → Sark · 14:00', tickets: '2 adults' },
+  ];
+
+  updateStats();
+  renderManifest();
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = manifest.length;
+  document.getElementById('stat-boarded').textContent = boarded.size;
+  document.getElementById('stat-remaining').textContent = manifest.length - boarded.size;
+}
+
+function renderManifest() {
+  const list = document.getElementById('passenger-list');
+  if (!manifest.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:#7a9ea6;font-size:14px;">No bookings for today</div>';
+    return;
+  }
+  list.innerHTML = manifest.map(p => {
+    const done = boarded.has(p.id);
+    return `<div class="passenger-card ${done ? 'boarded' : ''}" id="pax-${p.id}">
+      <div class="pax-info">
+        <div class="pax-name">${p.name}</div>
+        <div class="pax-detail">${p.detail}</div>
+        <div class="pax-tickets">${p.tickets}</div>
+      </div>
+      <button class="board-btn ${done ? 'boarded' : ''}" onclick="markBoarded('${p.id}')" ${done ? 'disabled' : ''}>
+        ${done ? '✓ Boarded' : 'Board'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function markBoarded(id) {
+  boarded.add(id);
+  updateStats();
+  renderManifest();
+}
+
+function refreshManifest() {
+  manifest = [];
+  boarded.clear();
+  document.getElementById('passenger-list').innerHTML = '<div style="text-align:center;padding:40px;color:#7a9ea6;font-size:14px;">Loading…</div>';
+  loadManifest();
+}
+
+async function scanQR() {
+  alert('QR scanning — implement with jsQR or a native camera integration.');
+}
+
+loadManifest();
+</script>
+</body>
+</html>

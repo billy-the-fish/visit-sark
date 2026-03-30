@@ -1,0 +1,16 @@
+name = "visit-sark-worker"
+main = "index.js"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+# Production route — update to your domain when ready
+# [env.production]
+# route = "visitsark.gg/api/*"
+
+[vars]
+ALLOWED_ORIGIN = "https://visitsark.gg"
+
+# Secret environment variables — set with:
+#   wrangler secret put SUMUP_API_KEY
+#   wrangler secret put SUPABASE_URL
+#   wrangler secret put SUPABASE_SERVICE_KEY
