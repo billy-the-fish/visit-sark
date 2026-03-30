@@ -65,6 +65,12 @@ tr:hover td { background: #faf6ee; }
 .btn { padding: 8px 16px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; }
 .btn-primary { background: var(--sea-deep); color: #fff; }
 .btn-ghost   { background: transparent; color: var(--sea-deep); border: 1.5px solid var(--sea); }
+.btn-danger  { background: var(--error); color: #fff; }
+.field-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--fog); margin-bottom: 5px; }
+.field-input { width: 100%; padding: 9px 12px; border: 1.5px solid var(--parchment); border-radius: 10px; font-size: 13px; font-family: 'Outfit', sans-serif; outline: none; background: var(--cream); }
+.field-input:focus { border-color: var(--sea); }
+.day-check { display: flex; align-items: center; gap: 4px; font-size: 12px; padding: 4px 10px; border: 1.5px solid var(--parchment); border-radius: 8px; cursor: pointer; }
+.day-check:has(input:checked) { background: var(--sea-pale); border-color: var(--sea-deep); color: var(--sea-deep); }
 </style>
 </head>
 <body>
@@ -156,11 +162,93 @@ tr:hover td { background: #faf6ee; }
 
   <!-- EVENTS -->
   <div class="page" id="page-events">
-    <div class="page-title">Events Calendar</div>
-    <div class="page-sub">Add and manage Sark events</div>
-    <div style="text-align:center;padding:60px;color:var(--fog);">
-      <div style="font-size:40px;margin-bottom:12px;">📅</div>
-      <div>Event management coming soon</div>
+    <div class="page-title">Events</div>
+    <div class="page-sub">Add and manage What's On events</div>
+
+    <!-- Add event form -->
+    <div class="table-wrap" style="padding:20px;margin-bottom:24px;">
+      <h3 style="font-size:14px;margin-bottom:16px;">Add Event</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="grid-column:1/-1">
+          <label class="field-label">Name</label>
+          <input id="ev-name" type="text" placeholder="Event name" class="field-input">
+        </div>
+        <div style="grid-column:1/-1">
+          <label class="field-label">Description</label>
+          <input id="ev-desc" type="text" placeholder="Short description" class="field-input">
+        </div>
+        <div>
+          <label class="field-label">Type</label>
+          <select id="ev-type" class="field-input">
+            <option value="festival">Festival</option>
+            <option value="sports">Sports</option>
+            <option value="nature">Nature</option>
+            <option value="community" selected>Community</option>
+            <option value="arts">Arts</option>
+            <option value="ferry">Ferry</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Colour</label>
+          <select id="ev-color" class="field-input">
+            <option value="#e07a45">Orange — Festival</option>
+            <option value="#38b6cc">Teal — Sports</option>
+            <option value="#7ad45a">Green — Nature</option>
+            <option value="#c4892a" selected>Gold — Community</option>
+            <option value="#a855f7">Purple — Arts</option>
+            <option value="#1a6bb5">Blue — Ferry</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1">
+          <label class="field-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="ev-recurring" onchange="toggleRecurring(this)"> Recurring event
+          </label>
+        </div>
+        <!-- One-off -->
+        <div id="ev-oneoff">
+          <label class="field-label">Date</label>
+          <input id="ev-date" type="date" class="field-input">
+        </div>
+        <!-- Recurring -->
+        <div id="ev-recur" style="display:none;grid-column:1/-1;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div>
+              <label class="field-label">From</label>
+              <input id="ev-recur-start" type="date" class="field-input">
+            </div>
+            <div>
+              <label class="field-label">To</label>
+              <input id="ev-recur-end" type="date" class="field-input">
+            </div>
+          </div>
+          <label class="field-label">Repeat on days (leave all unchecked for every day)</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+            <label class="day-check"><input type="checkbox" name="recur-day" value="0"> Sun</label>
+            <label class="day-check"><input type="checkbox" name="recur-day" value="1"> Mon</label>
+            <label class="day-check"><input type="checkbox" name="recur-day" value="2"> Tue</label>
+            <label class="day-check"><input type="checkbox" name="recur-day" value="3"> Wed</label>
+            <label class="day-check"><input type="checkbox" name="recur-day" value="4"> Thu</label>
+            <label class="day-check"><input type="checkbox" name="recur-day" value="5"> Fri</label>
+            <label class="day-check"><input type="checkbox" name="recur-day" value="6"> Sat</label>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="adminAddEvent()">Add Event</button>
+      <span id="ev-msg" style="font-size:12px;margin-left:12px;color:var(--fog);"></span>
+    </div>
+
+    <!-- Events list -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>All Events</h3>
+        <button class="btn btn-ghost" onclick="adminLoadEvents()">Refresh</button>
+      </div>
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Date / Recurrence</th><th></th></tr></thead>
+        <tbody id="events-tbody">
+          <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--fog);">Loading…</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -191,15 +279,103 @@ tr:hover td { background: #faf6ee; }
 </main>
 
 <script>
+const WORKER_URL = localStorage.getItem('vs_worker_url') ||
+  (location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    ? 'http://localhost:8787'
+    : 'https://YOUR_WORKER.workers.dev');
+const ADMIN_TOKEN = localStorage.getItem('vs_admin_token') || '';
+
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
+  if (id === 'events') adminLoadEvents();
 }
 
 document.getElementById('dash-date').textContent =
   new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+// ── EVENTS ───────────────────────────────────────────────────────────────────
+
+function toggleRecurring(cb) {
+  document.getElementById('ev-oneoff').style.display = cb.checked ? 'none' : '';
+  document.getElementById('ev-recur').style.display  = cb.checked ? '' : 'none';
+}
+
+async function adminLoadEvents() {
+  const tbody = document.getElementById('events-tbody');
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--fog);">Loading…</td></tr>';
+  try {
+    const res = await fetch(`${WORKER_URL}/events`);
+    const rows = await res.json();
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--fog);">No events yet</td></tr>';
+      return;
+    }
+    const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    tbody.innerHTML = rows.map(r => {
+      const dateStr = r.recurring
+        ? `Every ${r.recur_days?.map(d=>DAYS[d]).join(', ')||'day'} · ${r.recur_start} → ${r.recur_end}`
+        : r.event_date;
+      return `<tr>
+        <td><strong>${r.name}</strong><br><span style="font-size:11px;color:var(--fog)">${r.description||''}</span></td>
+        <td><span class="badge" style="background:${r.color}22;color:${r.color}">${r.type}</span></td>
+        <td style="font-size:12px">${dateStr}</td>
+        <td><button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="adminDeleteEvent('${r.id}')">Delete</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--error);">Failed to load — check Worker URL and token in Settings</td></tr>';
+  }
+}
+
+async function adminAddEvent() {
+  const msg = document.getElementById('ev-msg');
+  const recurring = document.getElementById('ev-recurring').checked;
+  const body = {
+    name:        document.getElementById('ev-name').value.trim(),
+    description: document.getElementById('ev-desc').value.trim(),
+    type:        document.getElementById('ev-type').value,
+    color:       document.getElementById('ev-color').value,
+    recurring,
+  };
+  if (!body.name) { msg.textContent = 'Name is required.'; return; }
+  if (recurring) {
+    body.recur_start = document.getElementById('ev-recur-start').value;
+    body.recur_end   = document.getElementById('ev-recur-end').value;
+    body.recur_days  = [...document.querySelectorAll('input[name=recur-day]:checked')].map(i=>parseInt(i.value));
+    if (!body.recur_start || !body.recur_end) { msg.textContent = 'Start and end dates required.'; return; }
+  } else {
+    body.event_date = document.getElementById('ev-date').value;
+    if (!body.event_date) { msg.textContent = 'Date is required.'; return; }
+  }
+  msg.textContent = 'Saving…';
+  try {
+    const res = await fetch(`${WORKER_URL}/events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': ADMIN_TOKEN },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    msg.textContent = 'Event added!';
+    document.getElementById('ev-name').value = '';
+    document.getElementById('ev-desc').value = '';
+    adminLoadEvents();
+  } catch(e) {
+    msg.textContent = 'Error: ' + e.message;
+  }
+}
+
+async function adminDeleteEvent(id) {
+  if (!confirm('Delete this event?')) return;
+  await fetch(`${WORKER_URL}/events`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': ADMIN_TOKEN },
+    body: JSON.stringify({ id }),
+  });
+  adminLoadEvents();
+}
 </script>
 </body>
 </html>

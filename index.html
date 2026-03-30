@@ -73,23 +73,39 @@
     <!-- CALENDAR -->
     <div class="panel" id="panel-calendar">
       <div class="dp-header">
-        <div class="dp-title">Island Events Calendar</div>
-        <div class="dp-subtitle">Tap any highlighted day to see what's on and add it to your itinerary.</div>
+        <div class="dp-title">What's On</div>
+        <div class="dp-subtitle">Events, festivals and happenings on Sark.</div>
       </div>
-      <div class="cal-nav">
-        <button class="cal-nav-btn" onclick="calPrev()">‹</button>
-        <div class="cal-month-label" id="calMonthLabel"></div>
-        <button class="cal-nav-btn" onclick="calNext()">›</button>
+      <div class="cal-view-toggle">
+        <button class="cal-toggle-btn active" id="calToggleCal" onclick="calSetView('calendar')">📅 Calendar</button>
+        <button class="cal-toggle-btn" id="calToggleList" onclick="calSetView('list')">☰ List</button>
       </div>
-      <div class="cal-grid" id="calGrid"></div>
-      <div class="cal-legend">
-        <div class="cal-legend-item"><div class="cal-dot" style="background:#e07a45"></div> Festival</div>
-        <div class="cal-legend-item"><div class="cal-dot" style="background:#38b6cc"></div> Sports</div>
-        <div class="cal-legend-item"><div class="cal-dot" style="background:#7ad45a"></div> Nature</div>
-        <div class="cal-legend-item"><div class="cal-dot" style="background:#c4892a"></div> Community</div>
-        <div class="cal-legend-item"><div class="cal-dot" style="background:#a855f7"></div> Arts</div>
+
+      <!-- Shared filter legend -->
+      <div class="cal-legend" id="calLegend">
+        <div class="cal-legend-item active" data-type="festival"  onclick="calToggleFilter(this)" style="--dot:#e07a45"><div class="cal-dot" style="background:#e07a45"></div> Festival</div>
+        <div class="cal-legend-item active" data-type="sports"    onclick="calToggleFilter(this)" style="--dot:#38b6cc"><div class="cal-dot" style="background:#38b6cc"></div> Sports</div>
+        <div class="cal-legend-item active" data-type="nature"    onclick="calToggleFilter(this)" style="--dot:#7ad45a"><div class="cal-dot" style="background:#7ad45a"></div> Nature</div>
+        <div class="cal-legend-item active" data-type="community" onclick="calToggleFilter(this)" style="--dot:#c4892a"><div class="cal-dot" style="background:#c4892a"></div> Community</div>
+        <div class="cal-legend-item active" data-type="arts"      onclick="calToggleFilter(this)" style="--dot:#a855f7"><div class="cal-dot" style="background:#a855f7"></div> Arts</div>
+        <div class="cal-legend-item active" data-type="ferry"     onclick="calToggleFilter(this)" style="--dot:#1a6bb5"><div class="cal-dot" style="background:#1a6bb5"></div> 🛥️ Ferry</div>
       </div>
-      <div id="calEventDetail" class="cal-event-detail" style="display:none"></div>
+
+      <!-- Calendar view -->
+      <div id="calViewCalendar">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="calPrev()">‹</button>
+          <div class="cal-month-label" id="calMonthLabel"></div>
+          <button class="cal-nav-btn" onclick="calNext()">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div id="calEventDetail" class="cal-event-detail" style="display:none"></div>
+      </div>
+
+      <!-- List view -->
+      <div id="calViewList" style="display:none">
+        <div id="calListContent"></div>
+      </div>
     </div>
 
     <!-- DAY PLANNER -->
@@ -964,7 +980,9 @@ const IOSS_TIMETABLE={"2026-03-01":{"gsy":["14:00"],"sark":["15:00"]},"2026-03-0
 function iossGetSailings(d){return IOSS_TIMETABLE[d]||null;}
 
 
-const WORKER_URL='https://YOUR_WORKER.workers.dev';
+const WORKER_URL=location.hostname==='localhost'||location.hostname==='127.0.0.1'
+  ? 'http://localhost:8787'
+  : 'https://YOUR_WORKER.workers.dev';
 
 const PHOTOS={
   bus:       'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&h=500&fit=crop&q=80',
@@ -1013,7 +1031,8 @@ window.addEventListener('load',()=>{
   populateDatesYear('bikeDates',iso=>S.bike.date=iso);
   dpInit();
   renderEat();
-  calRender();
+  initEvents();
+  initFerrySailings();
   populateDatesYear('foodDates',iso=>S.food.date=iso);
   setTimeout(()=>document.getElementById('splash').classList.add('hide'),1800);
   const p=new URLSearchParams(location.search);
@@ -2287,40 +2306,102 @@ async function dpBookAll(){
 }
 
 /* ── CALENDAR ────────────────────────────────────────────────────────── */
-const SARK_EVENTS=[
-  {date:'2026-04-18',name:'Good Friday Tradition',desc:'Traditional Good Friday celebrations on the island.',type:'community',color:'#c4892a'},
-  {date:'2026-05-01',name:'La Beltane',desc:'May Day celebrations at La Seigneurie Gardens.',type:'festival',color:'#e07a45'},
-  {date:'2026-05-09',name:'Liberation Day',desc:'Channel Islands Liberation Day celebration.',type:'community',color:'#c4892a'},
-  {date:'2026-06-01',name:'Creative Sark',desc:'A week of creative workshops and arts events across the island.',type:'arts',color:'#a855f7'},
-  {date:'2026-06-05',name:'Creative Sark',desc:'Creative Sark arts week continues.',type:'arts',color:'#a855f7'},
-  {date:'2026-06-20',name:'Sark Folk Festival',desc:'Annual folk music festival. Live performances across the island.',type:'festival',color:'#e07a45'},
-  {date:'2026-06-21',name:'Sark Folk Festival',desc:'Folk Festival day two. Sessions at The Old Hall and outdoor stages.',type:'festival',color:'#e07a45'},
-  {date:'2026-07-04',name:'Sark Sheep Racing',desc:"The world-famous Sark sheep racing — don't miss it!",type:'sports',color:'#38b6cc'},
-  {date:'2026-07-11',name:'Sark Triathlon',desc:'Swim, run and cycle your way around Sark!',type:'sports',color:'#38b6cc'},
-  {date:'2026-07-18',name:'Sark to Jersey Swim',desc:'Annual open-water channel swim.',type:'sports',color:'#38b6cc'},
-  {date:'2026-08-01',name:'Astronomy Week',desc:'Sark Dark Sky Island — stargazing events and guided astronomy nights.',type:'nature',color:'#7ad45a'},
-  {date:'2026-08-08',name:'Flower Show',desc:'Annual Sark Flower and Horticultural Show.',type:'community',color:'#c4892a'},
-  {date:'2026-08-15',name:'Sark Summer Fête',desc:'Annual island fête with games, stalls, food and live entertainment.',type:'festival',color:'#e07a45'},
-  {date:'2026-08-22',name:'Gig Racing',desc:'Traditional Channel Islands gig boat racing around Sark.',type:'sports',color:'#38b6cc'},
-  {date:'2026-09-13',name:'Autumn Walking Festival',desc:"Guided walking weekends exploring the island trails.",type:'nature',color:'#7ad45a'},
-  {date:'2026-09-14',name:'Autumn Walking Festival',desc:'Walking festival continues — cliff paths and nature walks.',type:'nature',color:'#7ad45a'},
-  {date:'2026-10-31',name:'Dark Sky Festival',desc:"Sark celebrates its Dark Sky Island status with special astronomy events.",type:'nature',color:'#7ad45a'},
-  {date:'2026-12-24',name:'Christmas on Sark',desc:'Carols and festivities in the island chapel and village.',type:'community',color:'#c4892a'},
-];
-(function(){
-  const start=new Date('2026-03-01'),end=new Date('2026-10-31');
-  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
-    const iso=d.toISOString().split('T')[0],dow=d.getDay();
-    if(dow===2) SARK_EVENTS.push({date:iso,name:'Cricket Friendly',desc:'Weekly cricket. All levels welcome.',type:'sports',color:'#38b6cc'});
-    if(dow===3) SARK_EVENTS.push({date:iso,name:'Jam Night',desc:'Weekly jam session at The Old Hall.',type:'arts',color:'#a855f7'});
-    if(dow===0) SARK_EVENTS.push({date:iso,name:'Sark Yoga',desc:'Restorative yoga class.',type:'nature',color:'#7ad45a'});
-  }
-})();
-
+let SARK_EVENTS=[];
 const EVENT_MAP={};
-SARK_EVENTS.forEach(e=>{if(!EVENT_MAP[e.date])EVENT_MAP[e.date]=[];EVENT_MAP[e.date].push(e);});
+
+function expandEventRows(rows){
+  const out=[];
+  for(const r of rows){
+    if(!r.recurring){
+      if(r.event_date) out.push({date:r.event_date,name:r.name,desc:r.description||'',type:r.type,color:r.color});
+    } else {
+      const start=new Date(r.recur_start+'T12:00:00'),end=new Date(r.recur_end+'T12:00:00');
+      const days=new Set(r.recur_days||[]);
+      for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+        if(!days.size||days.has(d.getDay()))
+          out.push({date:d.toISOString().split('T')[0],name:r.name,desc:r.description||'',type:r.type,color:r.color});
+      }
+    }
+  }
+  return out;
+}
+
+function buildEventMap(){
+  Object.keys(EVENT_MAP).forEach(k=>delete EVENT_MAP[k]);
+  SARK_EVENTS.filter(e=>e.type!=='ferry').forEach(e=>{if(!EVENT_MAP[e.date])EVENT_MAP[e.date]=[];EVENT_MAP[e.date].push(e);});
+  // Inject IOSS sailings
+  Object.entries(IOSS_TIMETABLE).forEach(([date,s])=>{
+    if(!EVENT_MAP[date]) EVENT_MAP[date]=[];
+    const gsy=s.gsy.join(', ');
+    const sark=s.sark.join(', ');
+    EVENT_MAP[date].push({date,type:'ferry',color:'#1a6bb5',name:'Isle of Sark Shipping',desc:`From Guernsey: ${gsy} · From Sark: ${sark}`});
+  });
+  // Inject Manche Iles sailings
+  Object.entries(MANCHE_TIMETABLE).forEach(([date,s])=>{
+    if(!EVENT_MAP[date]) EVENT_MAP[date]=[];
+    EVENT_MAP[date].push({date,type:'ferry',color:'#0e6fa3',name:'Manche Iles',desc:`Departs Jersey: ${s.dep} · Departs Sark: ${s.ret}`});
+  });
+}
+
+async function initEvents(){
+  try{
+    const res=await fetch(`${WORKER_URL}/events`);
+    if(res.ok){
+      const rows=await res.json();
+      SARK_EVENTS=expandEventRows(rows);
+    }
+  }catch(e){
+    console.warn('Could not load events from server:',e);
+  }
+  buildEventMap();
+  calRender();
+}
+
+async function initFerrySailings(){
+  try{
+    const res=await fetch(`${WORKER_URL}/ferry-sailings`);
+    if(res.ok){
+      const rows=await res.json();
+      // Clear and repopulate timetable objects from DB
+      Object.keys(IOSS_TIMETABLE).forEach(k=>delete IOSS_TIMETABLE[k]);
+      Object.keys(MANCHE_TIMETABLE).forEach(k=>delete MANCHE_TIMETABLE[k]);
+      rows.forEach(r=>{
+        if(r.operator==='ioss'){
+          IOSS_TIMETABLE[r.sailing_date]={gsy:r.gsy_times||[],sark:r.sark_times||[]};
+        } else if(r.operator==='manche-iles'){
+          MANCHE_TIMETABLE[r.sailing_date]={dep:r.dep_time,ret:r.ret_time};
+        }
+      });
+    }
+  }catch(e){
+    console.warn('Could not load ferry sailings from server:',e);
+  }
+  // Rebuild event map with fresh timetable data and re-render
+  buildEventMap();
+  calRender();
+  if(calView==='list') calRenderList();
+  ferryTabUpdateSailings();
+  if(typeof fpUpdateSailingsPanel==='function') fpUpdateSailingsPanel();
+}
 
 let calYear=new Date().getFullYear(),calMonth=new Date().getMonth(),calSelectedDate=null;
+let calActiveFilters=new Set(['festival','sports','nature','community','arts','ferry']);
+
+function calToggleFilter(el){
+  const type=el.dataset.type;
+  if(calActiveFilters.has(type)){
+    if(calActiveFilters.size===1) return; // keep at least one active
+    calActiveFilters.delete(type);
+    el.classList.remove('active');
+  } else {
+    calActiveFilters.add(type);
+    el.classList.add('active');
+  }
+  calRender();
+  if(calView==='list') calRenderList();
+  const d=document.getElementById('calEventDetail');
+  if(d) d.style.display='none';
+}
 
 function calRender(){
   const label=document.getElementById('calMonthLabel');
@@ -2336,7 +2417,7 @@ function calRender(){
   const dayCells=Array.from({length:daysInMonth},(_,i)=>{
     const num=i+1;
     const iso=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(num).padStart(2,'0')}`;
-    const evts=EVENT_MAP[iso]||[];
+    const evts=(EVENT_MAP[iso]||[]).filter(e=>calActiveFilters.has(e.type));
     const dots=evts.slice(0,3).map(e=>`<div class="cal-dot" style="background:${e.color||'#999'}"></div>`).join('');
     const classes=['cal-day',iso===today?'today':'',iso===calSelectedDate?'selected':'',evts.length>0?'has-event':''].filter(Boolean).join(' ');
     return `<div class="${classes}" onclick="calSelectDay('${iso}')">${num}${dots?`<div class="cal-dots">${dots}</div>`:''}</div>`;
@@ -2346,7 +2427,7 @@ function calRender(){
 
 function calSelectDay(iso){
   calSelectedDate=iso;calRender();
-  const evts=EVENT_MAP[iso]||[];
+  const evts=(EVENT_MAP[iso]||[]).filter(e=>calActiveFilters.has(e.type));
   const detail=document.getElementById('calEventDetail');
   if(!detail)return;
   if(!evts.length){detail.style.display='none';return;}
@@ -2368,6 +2449,31 @@ function calAddToPlan(name,iso){
 
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}calRender();const d=document.getElementById('calEventDetail');if(d)d.style.display='none';}
 function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}calRender();const d=document.getElementById('calEventDetail');if(d)d.style.display='none';}
+
+let calView='calendar';
+function calSetView(v){
+  calView=v;
+  document.getElementById('calViewCalendar').style.display=v==='calendar'?'':'none';
+  document.getElementById('calViewList').style.display=v==='list'?'':'none';
+  document.getElementById('calToggleCal').classList.toggle('active',v==='calendar');
+  document.getElementById('calToggleList').classList.toggle('active',v==='list');
+  if(v==='list') calRenderList();
+}
+
+function calRenderList(){
+  const today=new Date().toISOString().split('T')[0];
+  const upcoming=Object.entries(EVENT_MAP).filter(([d])=>d>=today).flatMap(([,evts])=>evts).filter(e=>calActiveFilters.has(e.type)).sort((a,b)=>a.date.localeCompare(b.date)||a.name.localeCompare(b.name));
+  if(!upcoming.length){document.getElementById('calListContent').innerHTML='<p style="text-align:center;color:var(--fog);padding:32px">No upcoming events.</p>';return;}
+  let lastMonth='';
+  const html=upcoming.map(e=>{
+    const d=new Date(e.date+'T12:00:00');
+    const monthKey=d.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+    const dateStr=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    const header=monthKey!==lastMonth?(lastMonth=monthKey,`<div class="cal-list-month">${monthKey}</div>`):'';
+    return `${header}<div class="cal-list-item"><div class="cal-event-dot" style="background:${e.color||'#999'}"></div><div><div class="cal-event-name">${e.name}</div><div class="cal-list-date">${dateStr}</div><div class="cal-event-desc">${e.desc}</div><button class="cal-add-to-plan" onclick="calAddToPlan('${e.name.replace(/'/g,"\\'")}','${e.date}')">+ Add to My Day</button></div></div>`;
+  }).join('');
+  document.getElementById('calListContent').innerHTML=html;
+}
 
 const _dpItemTotalOrig = dpItemTotal;
 function dpItemTotal(planItem){

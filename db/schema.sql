@@ -73,8 +73,57 @@ create policy "service role full access" on bookings         for all using (auth
 create policy "service role full access" on validation_log   for all using (auth.role() = 'service_role');
 create policy "service role full access" on providers        for all using (auth.role() = 'service_role');
 
+-- ── EVENTS ───────────────────────────────────────────────────────────────────
+-- Island events shown in the What's On calendar.
+-- One-off events: set event_date only.
+-- Recurring events: set recurring=true, recur_days (0=Sun…6=Sat), recur_start, recur_end.
+
+create table if not exists events (
+  id           uuid primary key default gen_random_uuid(),
+  name         text not null,
+  description  text,
+  type         text not null default 'community'
+                 check (type in ('festival','sports','nature','community','arts','ferry')),
+  color        text not null default '#c4892a',
+  event_date   date,                -- one-off events
+  recurring    boolean not null default false,
+  recur_days   integer[],           -- [0-6] sun=0 … sat=6
+  recur_start  date,                -- start of recurring window
+  recur_end    date,                -- end of recurring window
+  created_at   timestamptz default now()
+);
+
+alter table events enable row level security;
+-- Public read (events are not sensitive)
+create policy "public read events" on events for select using (true);
+-- Only service role can write
+create policy "service role write events" on events for all using (auth.role() = 'service_role');
+
+-- ── FERRY SAILINGS ───────────────────────────────────────────────────────────
+-- One row per sailing date per operator.
+-- IOSS: gsy_times = departures from Guernsey, sark_times = departures from Sark.
+-- Manche Iles: dep_time = departs Jersey, ret_time = departs Sark.
+
+create table if not exists ferry_sailings (
+  id           uuid primary key default gen_random_uuid(),
+  operator     text not null check (operator in ('ioss','manche-iles')),
+  sailing_date date not null,
+  gsy_times    text[],   -- IOSS departures from Guernsey (HH:MM)
+  sark_times   text[],   -- IOSS departures from Sark (HH:MM)
+  dep_time     text,     -- Manche Iles departure from Jersey (HH:MM)
+  ret_time     text,     -- Manche Iles return from Sark (HH:MM)
+  created_at   timestamptz default now(),
+  unique (operator, sailing_date)
+);
+
+alter table ferry_sailings enable row level security;
+create policy "public read ferry_sailings" on ferry_sailings for select using (true);
+create policy "service role write ferry_sailings" on ferry_sailings for all using (auth.role() = 'service_role');
+
 -- ── INDEXES ──────────────────────────────────────────────────────────────────
 
 create index if not exists bookings_token_idx     on bookings(token);
 create index if not exists bookings_reference_idx on bookings(reference);
 create index if not exists bookings_date_idx      on bookings(booking_date);
+create index if not exists events_date_idx        on events(event_date);
+create index if not exists events_type_idx        on events(type);

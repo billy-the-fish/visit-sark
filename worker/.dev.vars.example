@@ -1,0 +1,5 @@
+SUMUP_API_KEY=your_sumup_bearer_token
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_SERVICE_KEY=your_supabase_service_role_key
+ADMIN_TOKEN=choose_a_secret_token_for_admin_access
+ALLOWED_ORIGIN=http://localhost:3000

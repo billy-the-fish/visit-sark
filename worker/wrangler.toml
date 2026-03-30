@@ -14,3 +14,4 @@ ALLOWED_ORIGIN = "https://visitsark.gg"
 #   wrangler secret put SUMUP_API_KEY
 #   wrangler secret put SUPABASE_URL
 #   wrangler secret put SUPABASE_SERVICE_KEY
+#   wrangler secret put ADMIN_TOKEN
